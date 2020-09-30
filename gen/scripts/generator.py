@@ -17,7 +17,8 @@ parser.add_argument('out', metavar='output', type=str, help='output directory')
 def net_info(domain):
     # covert internationalized domains (IDN) to ASCII
     encoded = domain.encode('idna')
-    ips = subprocess.check_output(['dig', encoded, 'A', '+short']).decode('utf-8').split('\n')
+    ips = subprocess.check_output(['dig', encoded, 'A', '+short', '@8.8.8.8',
+                                   '@8.8.4.4']).decode('utf-8').split('\n')
     ips = [ip for ip in ips if re.match('\d+.\d+.\d+.\d+', ip)]
     return ips
 
@@ -125,7 +126,7 @@ def run():
     [plain_subnets.update(networks) for networks in subnets.values()]
     plain_subnets = list(plain_subnets)
     plain_subnets.sort(key=lambda s: ipaddress.ip_network(s))
-    
+
     # Generate index.html
     with open(out_dir + '/index.tpl.html') as f:
         template = Template(f.read())
@@ -146,7 +147,7 @@ def run():
                 )
                 with open(out_dir + l18n['settings']['html_out_folder'][lang] + '/index.html', 'w') as o:
                     o.write(file)
-    
+
     # Generate APIs
     with open(out_dir + '/all.json', 'w') as outfile:
         json.dump(individuals, outfile)
@@ -163,7 +164,7 @@ def run():
     with open(out_dir + '/subnets.txt', 'w') as outfile:
         outfile.write('\n'.join(plain_subnets))
     gen_mikrotik(subnets)
-    
+
 args = parser.parse_args()
 out_dir = args.out
 run()

@@ -1,0 +1,31 @@
+name: generator
+
+on:
+  push:
+    branches:
+      - surge_sh
+  schedule:
+  # At 0:00 on every 3 days
+  - cron: '0 0 */3 * *'
+
+jobs:
+  generator:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        sudo apt-get install whois dnsutils
+        python3 -m pip install Jinja2 pytz transliterate
+    - name: Run gen/scripts/generator.py
+      working-directory: ./gen/scripts
+      run: python3 -u generator.py ../../www/
+    - name: Deploy to surge.sh
+      uses: dswistowski/surge-sh-action@v1
+      with:
+        domain: 'uablacklist.surge.sh'
+        project: './www'
+        login: ${{ secrets.surge_login }}
+        token: ${{ secrets.surge_token }}

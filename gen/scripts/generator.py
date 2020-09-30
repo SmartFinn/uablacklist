@@ -89,6 +89,8 @@ def gen_mikrotik(subnets):
         i=i+1
 
 def filter_invalid_ips(ips):
+    if len(ips) > 30:
+        return []
     return [ip for ip in ips if ip != '127.0.0.1']
 
 def run():
